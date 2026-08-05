@@ -1,17 +1,25 @@
 # Vibe Coding from a System Software and Performance Engineering Perspective
 
-> ATPESC talk · 20 minutes · 19 content slides (24 total). A cautionary retrospective on
-> AI-agent-assisted development across two deliberately contrasting systems projects.
+> ATPESC talk · 20 minutes · **20 content slides (25 total) — at the hard ceiling.** A
+> retrospective on AI-agent-assisted development across two deliberately contrasting systems
+> projects. Anything added from here must displace something.
 >
 > Authors: Brice Videau (ALCF) and Claude. The deck is itself a vibe-coding artifact —
 > pretending otherwise would undercut the talk.
 
 ## Thesis
 
-You cannot let an agent run blindly and trust its work. It produced real systems software —
-including merged data-race fixes in an OpenCL runtime — but every single defect in this corpus was
-caught by **a sanitizer, a tracer, a bisect, a second implementation, or a human reviewer**, and
-never by the agent re-reading its own code.
+Two claims, and the talk fails if it lands only one of them.
+
+**The gain is real and large.** Six weeks on CCS produced roughly two years of work at the prior
+rate — 96 merged PRs on a C library with bindings. And rust-gpu/claspr is a gain of a different
+kind entirely: a SPIR-V backend port needing deep Rust and SPIR-V expertise Brice does not have.
+Not work that would have gone slowly — work that would not have happened. *Compression* on one
+project, *reach* on the other.
+
+**And you cannot let it run blindly.** Every single defect in this corpus was caught by **a
+sanitizer, a tracer, a bisect, a second implementation, or a human reviewer** — never by the agent
+re-reading its own code.
 
 The two case studies differ on one axis: **can the human verify the work?**
 
@@ -38,7 +46,7 @@ Filenames contain spaces — quote them.
 
 ```bash
 DECK="ATPESC 2026 - Vibe Coding - Brice Videau"
-python3 build_deck.py                                # asserts slide count == 24
+python3 build_deck.py                                # asserts slide count == 25
 soffice --headless --convert-to pdf "$DECK.pptx"
 rm -f slide-*.jpg && pdftoppm -jpeg -r 90 "$DECK.pdf" slide
 ```

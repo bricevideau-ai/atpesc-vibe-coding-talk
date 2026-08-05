@@ -478,7 +478,55 @@ claspr: 417 test functions, 24 compile-fail fixtures with golden stderr.
 The pocl line is the one I am proudest of and it is coming up next.
 """)
 
-# --- 8. The correctness work, side by side -------------------------------
+# --- 8. The productivity gain --------------------------------------------
+s = add(5)
+set_text(get_ph(s, 0), "The productivity gain is real")
+set_text(get_ph(s, 13), "Two different kinds of gain — compression, and reach")
+set_text(get_ph(s, 16), "CCS — compression")
+set_bullets(get_ph(s, 14), [
+    "Six weeks of this ≈ two years at the rate I had been going",
+    "96 merged PRs on a codebase I had maintained alone",
+    "The same work I would have done — the difference is when it shipped",
+    "Review, not typing, became the bottleneck",
+])
+set_text(get_ph(s, 17), "rust-gpu + claspr — reach")
+set_bullets(get_ph(s, 15), [
+    "A different kind of gain: this was out of reach for me alone",
+    "The port needs deep Rust and SPIR-V. I have neither.",
+    "Possible in principle — not for any sane investment of my time",
+    "It supplied the expertise; I supplied the semantics and the oracles",
+])
+set_notes(s, """
+Say this plainly, because the rest of the talk is cautionary and I do not want
+anyone leaving thinking the answer is "don't". The gain is large and it is real.
+
+CCS: six weeks produced roughly what two years would have produced at the rate
+I had been going. Be honest that this is my estimate as the person who has
+maintained that codebase for years, not a controlled measurement — but it is
+not a close call either. 96 merged PRs in six weeks on a C library with
+bindings is simply not a pace I can sustain by hand.
+
+Note what kind of gain that is: compression. Every one of those PRs is work I
+could have done and would have done eventually. The agent did not make me
+smarter about CCS; it removed the time cost of the part I already knew how to
+do. The bottleneck moved from writing to reviewing — which is why short
+single-topic PRs matter so much.
+
+rust-gpu is categorically different. A SPIR-V backend port needs deep Rust and
+deep SPIR-V internals. I am an OpenCL expert and neither of those. This is not
+work I would have done slowly — it is work I would not have done. Possible in
+principle, but not for any investment of my time that I could justify.
+
+That is the more interesting result for this audience. Compression is nice.
+Reach changes which problems you are allowed to consider. Several of you are
+sitting on a project you have written off as "I'd need to learn X first."
+
+The honest caveat if asked: it was not free. Real money in tokens, and a
+substantial amount of my attention on review, oracle design and debugging. The
+gain is in what got built, not in effortlessness.
+""")
+
+# --- 9. The correctness work, side by side -------------------------------
 s = add(5)
 set_text(get_ph(s, 0), "What the correctness work looked like")
 set_text(get_ph(s, 13), "Real defects, in both directions — found by tools, not by reading")
@@ -966,7 +1014,8 @@ s = add(3)
 set_text(get_ph(s, 0), "Takeaway")
 set_text(get_ph(s, 13), "You cannot let an agent run blindly and trust its work")
 set_bullets(get_ph(s, 14), [
-    "It produced real systems software — merged data-race fixes in an OpenCL runtime",
+    "The gain is real: two years of CCS work in six weeks, and a port "
+    "I would never have attempted alone",
     "It also shipped spec-UB for weeks and misdiagnosed its own race",
     "Every bug here was caught by a sanitizer, a tracer, a bisect, "
     "a second implementation, or a human",
@@ -975,8 +1024,12 @@ set_bullets(get_ph(s, 14), [
     "What stays human: choosing the oracle, and reading the spec adversarially",
 ])
 set_notes(s, """
-Land the middle bullet hard. It is the single empirical claim of the talk and
-it held across six months, three codebases and two very different modes of
+Both of the first two bullets have to land, in that order. The gain is real and
+large; the failure modes are real and dangerous. A talk that delivers only one
+of those is not useful to anyone.
+
+Land the third bullet hard. It is the single empirical claim of the talk and it
+held across six months, three codebases and two very different modes of
 working.
 
 The February 2025 failure and the 2026 successes have the same root: the model
@@ -1002,11 +1055,13 @@ add(13)
 # Save
 # ============================================================================
 
-EXPECTED = 24
+# 20 content slides is Brice's hard ceiling for the 20-minute slot. We are at
+# it. Anything new from here has to displace something, not append to it.
+EXPECTED = 25
 assert len(pres.slides) == EXPECTED, f"expected {EXPECTED} slides, built {len(pres.slides)}"
 noted = sum(1 for sl in pres.slides if sl.has_notes_slide
             and sl.notes_slide.notes_text_frame.text.strip())
 pres.save(OUT)
 print(f"Wrote {OUT}")
-print(f"Slide count: {len(pres.slides)}  (19 content + title + 3 breaks + closing)")
+print(f"Slide count: {len(pres.slides)}  (20 content + title + 3 breaks + closing)")
 print(f"Slides with speaker notes: {noted}")
