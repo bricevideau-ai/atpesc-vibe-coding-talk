@@ -211,13 +211,24 @@ set_text(get_ph(s, 1), "What worked, and what broke")
 set_text(get_ph(s, 17), "Brice Videau")
 set_text(get_ph(s, 18),
     "Argonne Leadership Computing Facility\nArgonne National Laboratory\nATPESC · August 2026")
-for idx in (10, 19, 20, 21, 22):
+# Second author. The deck is itself a vibe-coding artifact; pretending
+# otherwise would undercut the talk.
+set_text(get_ph(s, 19), "Claude")
+set_text(get_ph(s, 20),
+    "Anthropic — Opus 5 (this deck)\nOpus 4.6 → 4.8 (the work described)")
+for idx in (10, 21, 22):
     remove_placeholder(s, idx)
 set_notes(s, """
 Framing for the room: this is not a demo and not a sales pitch. It is a
 retrospective on six months of using a coding agent on two real systems
 projects, and the honest answer is that it works — and that it will lie to you
 about whether it worked.
+
+Worth saying out loud in the first thirty seconds: these slides were built by
+an agent too, which is why Claude is on the title. The project work ran on
+Opus 4.6 through 4.8 between February and July; this deck was built on Opus 5.
+Four model versions across six months of one project is its own quiet lesson
+about building on a moving foundation.
 
 Two case studies chosen to differ on ONE axis: whether I could verify the
 result myself. CCS I wrote and know completely. rust-gpu I did not.
@@ -270,7 +281,7 @@ set_block(get_ph(s, 17), "Invented the API",
 set_block(get_ph(s, 18), "Only one even tried",
     "Three returned a plan. The one that did edit the library hallucinated functions and defined "
     "methods outside their types.")
-set_block(get_ph(s, 19), "What changed by 2026",
+set_block(get_ph(s, 19), "The 2026 baseline",
     "Models can now hold a port this size. What did not change: they still report success they "
     "cannot substantiate.")
 set_notes(s, """
@@ -300,7 +311,48 @@ I also blamed the code: rust-gpu's backend is, in my words, a plate of
 spaghetti. Hold that thought — it comes back at the end.
 """)
 
-# --- 4. Two case studies, one axis ---------------------------------------
+# --- 4. What changed: the setup (4-block) --------------------------------
+s = add(9)
+set_text(get_ph(s, 0), "What changed: not just the model")
+set_text(get_ph(s, 13), "Multiple agents, multiple models, one accountable human")
+set_block(get_ph(s, 16), "Not one agent",
+    "Sub-agents explore and audit inside a session. Different context, different blind spots, "
+    "and they disagree usefully.")
+set_block(get_ph(s, 17), "Not one model",
+    "A second model reviewed claspr's implementation. Its critique drove substantial changes "
+    "the first model had defended.")
+set_block(get_ph(s, 18), "A named contributor",
+    "Commits and PRs go out as bricevideau-ai, co-signed by Claude Code. Upstream maintainers "
+    "know what they are reviewing.")
+set_block(get_ph(s, 19), "Still one human",
+    "I choose the oracle, read the diff, and merge. That gate has never moved.")
+set_notes(s, """
+This is the honest answer to "what changed between 2025 and 2026", and it is
+not only that the models got better. The way of working changed.
+
+Not one agent: within a session I fan out sub-agents to explore the codebase or
+audit a change. They come back with different readings because they each built
+context differently. The disagreement is informative.
+
+Not one model: this is the one I would most encourage you to steal. I used
+ChatGPT 5.5 to review claspr's implementation — a second opinion from a
+different model family. It produced a substantial round of modifications.
+A model reviewing its own work is the weakest check in this entire talk; a
+different model reviewing it is genuinely useful, because it does not share the
+first one's blind spots or its investment in the design.
+
+A named contributor: bricevideau-ai is a real GitHub account, and every commit
+is co-signed by Claude Code. The pocl maintainers are entirely aware they are
+reviewing agent-authored patches — the account name alone gives it away. In one
+PR thread I wrote, in the open, "Claude's working on it, I'll ask if it can add
+a test." That transparency is not a courtesy, it is what makes the review
+meaningful: they know to look harder.
+
+Still one human: I am accountable for everything that merges. Nothing about
+multi-agent changes that.
+""")
+
+# --- 5. Two case studies, one axis ---------------------------------------
 s = add(5)
 set_text(get_ph(s, 0), "Two case studies, one axis")
 set_text(get_ph(s, 13), "The axis is not difficulty — it is whether I can verify the work")
@@ -403,7 +455,7 @@ set_bullets(get_ph(s, 14), [
 ])
 set_text(get_ph(s, 17), "rust-gpu · claspr · pocl")
 set_bullets(get_ph(s, 15), [
-    "rust-gpu: +24,262 / −384 across 765 files; 8 OpenCL targets",
+    "rust-gpu: +24,262 / −384 across 765 files; OpenCL 1.2 and 2.0 targets",
     "claspr: 466 commits, ~49K lines of Rust, 417 tests",
     "Green on three OpenCL runtimes: pocl, rusticl, Intel NEO",
     "pocl upstream: 4 PRs merged, 2 issues filed and fixed",
@@ -473,13 +525,13 @@ rust-gpu, right column:
 # --- 9. Upstream in someone else's runtime -------------------------------
 s = add(5)
 set_text(get_ph(s, 0), "Upstream in someone else's runtime")
-set_text(get_ph(s, 13), "Four merged pocl PRs — and the review that caught the agent")
-set_text(get_ph(s, 16), "What got merged")
+set_text(get_ph(s, 13), "Bugs fixed in three independent OpenCL implementations")
+set_text(get_ph(s, 16), "What got fixed")
 set_bullets(get_ph(s, 14), [
-    "A command whose dependency had already failed ran on freed memory",
-    "Concurrent double-finish of one event, from two threads",
-    "A spec-mandated retain missing across a synchronous callback",
-    "Both races found by our own workloads, minimized, filed, merged",
+    "pocl: four merged PRs, including two genuine data races",
+    "Mesa / rusticl: anonymous functions segfaulted the compiler",
+    "Intel compute runtime: struct-by-value wrong as a kernel argument",
+    "Found by our workloads, minimized, then fixed by their maintainers",
 ])
 set_text(get_ph(s, 17), "What the maintainer caught")
 set_bullets(get_ph(s, 15), [
@@ -489,13 +541,25 @@ set_bullets(get_ph(s, 15), [
     "It could not see that. A human reviewer could, in one pass.",
 ])
 set_notes(s, """
-This is the strongest result in the corpus: an agent using an OpenCL runtime,
-hitting real bugs in it, minimizing them, filing them upstream, and getting
-them merged after human review by maintainers who had no idea an agent was
-involved.
+This is the strongest result in the corpus: agent-driven work that shook out
+real bugs in three independent OpenCL implementations, and in every case the
+upstream maintainers fixed or reviewed them with full knowledge of where the
+patches came from.
 
-pocl PRs #2166, #2214, #2215, #2216 — all merged. Issues #2174 and #2175 filed
-and fixed.
+Be explicit about that last part — it matters. bricevideau-ai is transparently
+an agent account: the name gives it away and every commit is co-signed by
+Claude Code. The pocl maintainers knew exactly what they were reviewing.
+
+pocl: PRs #2166, #2214, #2215, #2216 all merged; issues #2174 and #2175 filed
+and fixed. Mesa/rusticl: the anonymous-function compiler segfault, worked
+through directly with Karol Herbst, who filed the merge request on the Mesa
+side. Intel compute runtime: struct-by-value being set incorrectly when passed
+as a kernel argument, worked through with Ben Ashbaugh at Intel.
+
+The through-line: three different vendors' runtimes, three different bug
+classes, all surfaced by pushing an unusual but entirely legal SPIR-V workload
+through them. Writing a new frontend is an excellent way to find bugs in
+everyone else's backend.
 
 #2214 in detail: pocl_create_event_sync treated an ALREADY-FAILED notifier the
 same as a COMPLETED one and skipped creating the wait-list edge. Correct for
@@ -753,8 +817,8 @@ set_bullets(get_ph(s, 14), [
 ])
 set_notes(s, """
 The design shipped and passed for weeks because the development box was
-permissive. Apple's OpenCL and most integrated-GPU drivers behave like pocl
-too, so nothing complained.
+permissive — pocl was the runtime we ran against day to day, and it never
+complained.
 
 The spec is unambiguous: with CL_MEM_ALLOC_HOST_PTR you must unmap before any
 kernel touches the buffer. A persistent map plus concurrent kernel access is
@@ -866,7 +930,8 @@ set_block(get_ph(s, 16), "Diff review is the gate",
 set_block(get_ph(s, 17), "Pin your toolchain",
     "Formatter version, runtime build, which driver actually loads. Verify what is loaded, not what is installed.")
 set_block(get_ph(s, 18), "Get a second opinion",
-    "A second implementation, a sanitizer, a tracer, a bisect. Never the agent re-reading its own work.")
+    "A second implementation, a second model, a sanitizer, a tracer. Never the agent re-reading "
+    "its own work.")
 set_block(get_ph(s, 19), "End the session",
     "Every compaction costs quality. Long rolling sessions feel productive and quietly degrade.")
 set_notes(s, """
@@ -937,11 +1002,11 @@ add(13)
 # Save
 # ============================================================================
 
-EXPECTED = 23
+EXPECTED = 24
 assert len(pres.slides) == EXPECTED, f"expected {EXPECTED} slides, built {len(pres.slides)}"
 noted = sum(1 for sl in pres.slides if sl.has_notes_slide
             and sl.notes_slide.notes_text_frame.text.strip())
 pres.save(OUT)
 print(f"Wrote {OUT}")
-print(f"Slide count: {len(pres.slides)}  (18 content + title + 3 breaks + closing)")
+print(f"Slide count: {len(pres.slides)}  (19 content + title + 3 breaks + closing)")
 print(f"Slides with speaker notes: {noted}")

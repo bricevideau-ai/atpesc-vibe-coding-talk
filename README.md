@@ -1,7 +1,10 @@
 # Vibe Coding from a System Software and Performance Engineering Perspective
 
-> ATPESC talk · 20 minutes · 18 content slides (23 total). A cautionary retrospective on
+> ATPESC talk · 20 minutes · 19 content slides (24 total). A cautionary retrospective on
 > AI-agent-assisted development across two deliberately contrasting systems projects.
+>
+> Authors: Brice Videau (ALCF) and Claude. The deck is itself a vibe-coding artifact —
+> pretending otherwise would undercut the talk.
 
 ## Thesis
 
@@ -81,8 +84,9 @@ re-derive it — do not copy it from the ALCF deck.**
 | 99 PRs, #24→#122, 96 merged / 3 closed | 5 | `gh pr list -R argonne-lcf/CCS --author bricevideau-ai --state all --limit 300` |
 | Feb 26 → Apr 7 (41 days), ~16 merged PRs/week | 5 | derived from the same query's `createdAt`/`mergedAt` |
 | ~53,000 lines of C | 3 | `wc -l` over `src/` + `include/` + bindings on `devel` |
-| rust-gpu +24,262 / −384 across 765 files | 5 | `gh pr view 3 -R bricevideau-ai/rust-gpu --json additions,deletions,changedFiles` |
-| 8 `spirv-unknown-opencl*` targets | 5 | `opencl{1.2,2.0,2.1,2.2}` × `{, embedded}`. CI exercises 1.2 and 2.0. |
+| rust-gpu +24,262 / −384 across 765 files | 9 | `gh pr view 3 -R bricevideau-ai/rust-gpu --json additions,deletions,changedFiles` |
+| OpenCL **1.2 and 2.0** target environments | 9 | `.github/workflows/ci.yaml:176` — compiletests run `--target-env …,opencl1.2,opencl2.0`. **Corrected:** an earlier draft claimed "8 `spirv-unknown-opencl*` targets", derived by grepping strings. That grep hit an exhaustive `match` over spirv-tools' pre-existing `TargetEnv` enum in `link.rs` (the same block lists OpenGL 4.0–4.5 and WebGPU). Two is the real number. |
+| Fixes in Mesa/rusticl and Intel compute runtime | 11 | Worked directly with Karol Herbst (Red Hat/Mesa), who filed [Mesa MR !41404](https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/41404), and Ben Ashbaugh (Intel). Not filed under `bricevideau-ai`, so not discoverable via `gh`. |
 | claspr 466 commits, ~49K Rust LOC, 417 tests, 24 compile-fail fixtures | 5 | `git log --oneline main \| wc -l`; `find -name '*.rs' -not -path './target/*' \| xargs wc -l`; `grep -c '#\[test\]'`; `find -path '*compile_fail*' -name '*.rs'` |
 | 4 pocl PRs merged (#2166, #2214, #2215, #2216); 2 issues (#2174, #2175) | 5, 7 | `gh pr list -R pocl/pocl --author bricevideau-ai --state all` |
 | #2214 failure mode and `-14` outcome | 7 | pocl commit `b55a569a5` message |
@@ -107,5 +111,22 @@ That assessment is the control condition for the whole talk: one model documente
 and developer guide, changes to a backend it had never touched.
 
 It also closes a loop. In 2025 Brice partly blamed the failure on rust-gpu's backend being
-"a plate of spaghetti." Slide 20 returns to that: a year later he stopped treating illegibility as
+"a plate of spaghetti." Slide 21 returns to that: a year later he stopped treating illegibility as
 an excuse and started measuring it with `rust-code-analysis`.
+
+## Corrections applied after review
+
+Worth recording, because three of these were confident errors of exactly the kind the talk warns
+about:
+
+- **"Maintainers had no idea an agent was involved"** — false, and I wrote it while holding the
+  contradicting evidence. `bricevideau-ai` is transparently an agent account, every commit is
+  co-signed by Claude Code, and Brice wrote *"Claude's working on it"* in the pocl PR thread. Slide
+  11's notes now say the opposite, and it makes a better story: upstream maintainers knowingly
+  reviewing agent-authored patches.
+- **"8 OpenCL targets"** — wrong, see the provenance table. Two.
+- **Apple OpenCL** — I asserted it behaves permissively like pocl. We never tried it. Removed.
+- **Missing ecosystem impact** — the work also produced fixes in Mesa/rusticl and Intel's compute
+  runtime, not just pocl. Slide 11 now covers all three.
+- **Missing multi-model review** — a second model (ChatGPT 5.5) reviewing claspr's implementation
+  drove substantial changes. Now slide 4 and the "second opinion" gate on slide 22.
