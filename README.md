@@ -28,16 +28,19 @@ The two case studies differ on one axis: **can the human verify the work?**
 | File | What it is |
 |---|---|
 | `build_deck.py` | `python-pptx` generator. **Edit this, not the pptx.** |
-| `atpesc-vibe-coding.pptx` | The deck. |
-| `atpesc-vibe-coding.pdf` | PDF render for review. |
+| `ATPESC 2026 - Vibe Coding - Brice Videau.pptx` | The deck. |
+| `ATPESC 2026 - Vibe Coding - Brice Videau.pdf` | PDF render for review. |
 | `ALCF Presentation Template.pptx` | Committed so the build is self-contained. |
 
 ## Rebuild
 
+Filenames contain spaces — quote them.
+
 ```bash
-python3 build_deck.py                                      # asserts slide count == 23
-soffice --headless --convert-to pdf atpesc-vibe-coding.pptx
-rm -f slide-*.jpg && pdftoppm -jpeg -r 90 atpesc-vibe-coding.pdf slide
+DECK="ATPESC 2026 - Vibe Coding - Brice Videau"
+python3 build_deck.py                                # asserts slide count == 24
+soffice --headless --convert-to pdf "$DECK.pptx"
+rm -f slide-*.jpg && pdftoppm -jpeg -r 90 "$DECK.pdf" slide
 ```
 
 The `slide-*.jpg` files are ephemeral QA artifacts — regenerate, don't commit.

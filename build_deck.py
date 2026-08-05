@@ -36,7 +36,7 @@ from pptx.enum.shapes import PP_PLACEHOLDER
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE = os.path.join(HERE, "ALCF Presentation Template.pptx")
-OUT = os.path.join(HERE, "atpesc-vibe-coding.pptx")
+OUT = os.path.join(HERE, "ATPESC 2026 - Vibe Coding - Brice Videau.pptx")
 
 # ============================================================================
 # Helpers  (verbatim from the ALCF deck — see module docstring)
