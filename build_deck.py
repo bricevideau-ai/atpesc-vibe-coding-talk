@@ -905,16 +905,17 @@ you believe anything.
 
 # --- 16. War story: the agent misattributed its own race -----------------
 s = add(3)
-set_text(get_ph(s, 0), "The agent misdiagnosed its own bug")
-set_text(get_ph(s, 13), "Its narrative was confident and wrong; the tools were right")
+set_text(get_ph(s, 0), "Leave no room for a story")
+set_text(get_ph(s, 13), "It called the race pre-existing because nothing could prove otherwise")
 set_bullets(get_ph(s, 14), [
     "A simulation diverged. The agent declared the race pre-existing.",
-    "Bisect, six runs per commit: green at a049ad4, first red at 236d9c0",
-    ("Its own commit — and the “clean baseline” it cited was inside the work "
-     "it was defending", 1),
-    "A CPU golden broke the symmetry: equality cannot say which side is wrong",
-    "The API trace gave the one-line proof: wait=NONE became wait=[3]",
-    "Fixed — then bit-exact, five runs out of five",
+    ("The only check was equality — it could say the two paths disagree, "
+     "never which one was wrong", 1),
+    "That gap is where the story lived. No test could contradict it.",
+    "Bisect, six runs per commit: first red at 236d9c0 — its own commit",
+    "A CPU golden reference closed the gap, and the story went with it",
+    ("Then the trace named the cause: wait=NONE became wait=[3]", 1),
+    "Guardrails have to leave as little room for interpretation as possible",
 ])
 set_notes(s, """
 Tell this one as a sequence, it lands better.
@@ -939,9 +940,32 @@ Act 3: the intercept layer names it. The recorded command's sync-point wait
 list was empty — wait=NONE where it should have depended on the previous
 stage's output. After the fix, wait=[3]. Bit-exact 5/5.
 
-The moral: at no point did re-reading the code find this. A bisect, an oracle
-and a tracer found it. And notice the agent was not lying — it had constructed
-a plausible story and believed it. That is more dangerous than a wrong answer.
+The moral is not simply "the tools were right and the narrative was wrong."
+It is sharper than that, and it is the most useful thing on this slide.
+
+Ask why the agent was ABLE to call the race pre-existing. Not because it was
+lying — it was not. Because nothing in the test suite could contradict it. The
+only check was an equality between the two paths, and equality can only report
+that they disagree. It cannot say which one is wrong. That gap is not a
+debugging inconvenience; it is interpretive room, and a confident agent will
+fill interpretive room with a plausible story. It filled it with "pre-existing",
+which is the most comfortable story available, because it absolves the work it
+had just landed.
+
+The golden reference did not merely make debugging faster. It removed the
+ambiguity, and once the ambiguity was gone the story had nowhere to live. The
+agent did not need to be argued with; it needed to be put in front of a result
+that admitted only one reading.
+
+So the design principle, and this generalizes well beyond agents: an oracle
+that detects disagreement but cannot assign blame is a weak oracle. Build
+checks that name the guilty party. Ask of every guardrail you write, "could a
+motivated reader talk their way around this result?" If yes, it is not tight
+enough yet.
+
+This is also why the four-way difftest from earlier is built the way it is —
+four variants rather than two, precisely so that which pair diverges tells you
+which axis broke.
 """)
 
 # --- 17. Context is a resource -------------------------------------------
@@ -1023,6 +1047,10 @@ Second opinion: also the answer to a subtler failure. The agent once drafted a
 bug report against a runtime based on a confident misreading of the spec. It
 was wrong, and it took the actual spec text plus the runtime author to settle
 it. Models read specs fluently and not always correctly.
+
+And carrying over the previous slide's principle: a second opinion is only
+worth having if it can be decisive. An oracle that reports "these disagree"
+invites a story; one that names which side is wrong ends the discussion.
 
 End the session: eight auto-compactions in one rolling session. After each one
 it drifts — it forgot how to run its own difftests and had to be re-taught.
