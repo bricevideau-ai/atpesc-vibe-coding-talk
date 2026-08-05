@@ -176,14 +176,26 @@ control task, a docs-vs-code ablation, and per-subagent token accounting from th
 ### The finding nobody went looking for
 
 `DeviceOp` was 25 members before and is 24 after. Splitting that god-trait was ranked *"the single
-biggest lever"* going in — and it never happened, because **the model argued against it and Brice
-deferred**. What shipped instead was editorial: an `ARCHITECTURE.md` section naming the four
-members that are actually required.
+biggest lever"* going in — and that ranking was **the agent's own**. The sequence:
 
-The measurement does not settle whether that was right — the corpus dropped 2.4× regardless, so
-the model may simply have been correct. But it is a third mode, distinct from the two the deck
-otherwise covers: not the agent being wrong, and not the agent being unverified, but the agent
-being *persuasive* and the human deferring on a design judgment. It is in slide 22's speaker notes.
+1. Claude judged the trait split the bigger payoff.
+2. A **sub-agent** argued the opposite, and convinced Claude.
+3. Brice pushed back — he still wanted the split.
+4. Claude pushed back, now defending the sub-agent's position.
+5. Brice caved.
+
+Step 3 is the interesting one: Brice was arguing for *Claude's original position, against Claude,*
+and lost. The position that won was one neither of them started with — introduced by a sub-agent,
+adopted by the main agent, then defended against the human.
+
+The measurement does not settle whether it was right; the corpus dropped 2.4× regardless. But the
+*mode* is a third one, distinct from the two the deck otherwise covers. It is not the agent being
+wrong (slide 21), nor unverified work (slide 20). It is a fluent, internally consistent position,
+reached by two agents agreeing with each other, that a domain expert could not hold ground against.
+
+**This is the counterweight to slide 4's "sub-agents disagree usefully."** They also converge, and
+when they converge against you, you are outnumbered rather than corroborated. Slide 4's notes now
+foreshadow it; slide 22's notes pay it off.
 
 ## Corrections applied after review
 

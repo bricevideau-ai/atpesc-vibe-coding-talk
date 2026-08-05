@@ -334,6 +334,12 @@ Not one agent: within a session I fan out sub-agents to explore the codebase or
 audit a change. They come back with different readings because they each built
 context differently. The disagreement is informative.
 
+Flag the other edge now, and pay it off at the end: they also CONVERGE. Later
+in this talk there is a case where a sub-agent talked the main agent out of its
+own design judgment, I argued for the agent's original position, and I lost.
+Sub-agents are not independent reviewers. When they agree with each other, you
+are outnumbered rather than corroborated.
+
 Not one model: this is the one I would most encourage you to steal. I used
 ChatGPT 5.5 to review claspr's implementation — a second opinion from a
 different model family. It produced a substantial round of modifications.
@@ -1024,28 +1030,44 @@ time. And the single largest line item is not architecture at all: NOTES.md
 went 201KB to 16KB, roughly 51K tokens, which is a stale working document
 nobody had pruned.
 
-And the finding I did not go looking for, which is worth telling if there is
-time. I ranked splitting the 25-member DeviceOp god-trait as the single biggest
-lever going in. It has 24 members today. It never happened — because the model
-argued against it, and I caved.
+And the finding I did not go looking for. Tell it as a sequence, because the
+sequence is the whole point.
 
-What it proposed instead was editorial: an ARCHITECTURE.md section telling the
-reader which four members are actually required and that the cb_* methods are
-ignorable unless you are touching command buffers. Four lines of documentation
-in place of a refactor I had scoped in days.
+Splitting the 25-member DeviceOp god-trait was ranked the single biggest lever
+going in — and that was the AGENT's assessment, written into the notes. It has
+24 members today. Here is how that happened:
 
-Be careful how you judge that, because the measurement does not settle it. The
-corpus still dropped 2.4x, so the outcome was at minimum defensible and the
-model may simply have been right. But notice what mode I was in. This is not
-"the agent proposed, I verified" — it is "the agent argued, and I deferred on a
-design judgment in my own codebase." That is a third failure mode, distinct
-from the two the rest of this talk covers. The agent is not only sometimes
-wrong; it is consistently persuasive, and it never gets tired of arguing.
+  1. Claude judged the trait split the bigger payoff.
+  2. A sub-agent argued the opposite, and convinced Claude.
+  3. I pushed back — I still wanted the split.
+  4. Claude pushed back on me, now defending the sub-agent's position.
+  5. I caved.
 
-What would have settled it is the experiment I only ran later: measure the
-cost of entry before and after. I had the metric available and I made the call
-by discussion instead. Given everything else in this talk, that is a slightly
-embarrassing place to have ended up.
+Sit with step 3 for a second. I was arguing for Claude's ORIGINAL position,
+against Claude, and I lost. The position that won was one neither of us started
+with — it was introduced by a sub-agent, adopted by the main agent, and then
+defended against the human.
+
+What shipped instead was editorial: an ARCHITECTURE.md section naming the four
+members that are actually required. Four lines of documentation in place of a
+refactor scoped in days.
+
+Do not judge it too fast, because the measurement does not settle it. The
+corpus dropped 2.4x anyway, so the outcome was defensible and the sub-agent may
+simply have been right. But look at the failure mode, because it is a third one
+this talk does not otherwise cover. Slide 21 was an agent building a story
+nothing could contradict. This is different: a fluent, well-argued, internally
+consistent position, arrived at by two agents agreeing with each other, that a
+domain expert could not hold his ground against.
+
+Multi-agent cuts both ways. Two slides ago I told you sub-agents disagree
+usefully. They also converge — and when they converge against you, you are no
+longer arguing with an assistant, you are outnumbered in your own codebase.
+
+The honest coda: what would have settled it is the measurement I only ran the
+night before this talk. I had the metric available in July. I made the call by
+discussion instead. In a talk arguing that you should never accept an argument
+where a measurement is available, that is where I ended up.
 
 Every step behaviour-preserving, and verified as such: the runtime hotspots by
 running the full suite on three ICDs plus bit-identical simulation output; the
