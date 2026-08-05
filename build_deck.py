@@ -983,7 +983,8 @@ set_text(get_ph(s, 17), "The optimization")
 set_bullets(get_ph(s, 15), [
     "Profiled with rust-code-analysis to rank functions by complexity",
     "Worst function: cognitive 39 → 7",
-    "Largest module: 11,023 → 3,674 lines, down 67%",
+    "Corpus to orient for a graph change: ~209K → ~88K tokens",
+    "But total source fell only 6% — loadable in pieces, not smaller",
     "Behaviour-preserving, verified bit-identical on three runtimes",
 ])
 set_notes(s, """
@@ -1006,7 +1007,45 @@ profile it, find the hotspots, fix the worst ones, measure again.
 The metric is Mozilla's rust-code-analysis-cli, ranking functions by cognitive
 and cyclomatic complexity. Input::try_bind_slot was the worst function in the
 workspace at cognitive 39, now 7. expand_kernel was the workspace's #1 by
-cyclomatic complexity at 66, now 23. eager.rs went from 11,023 lines to 3,674.
+cyclomatic complexity at 66, now 23.
+
+The corpus figure is measured, not estimated, and it needs no model to
+reproduce: diff the two commits and count the bytes an agent must load to make
+a graph-level change. bcaf04e (before) = 838,822 bytes. 094ce2b (after), routed
+by the new ARCHITECTURE.md = 353,694 bytes. At 4 bytes per token that is
+~209K → ~88K, a 2.4x reduction. Note the before figure lands on ~209K, which
+independently corroborates the ~200K I had only ever observed anecdotally.
+
+Now the caveat, and say it out loud rather than waiting to be asked. Whole-
+library source fell only about 6%. eager.rs went 11,722 lines to 3,802, but the
+five new submodules add back 7,706 — the subtree total barely moved, 1.8%. We
+did not delete complexity. We made it possible to load one part of it at a
+time. And the single largest line item is not architecture at all: NOTES.md
+went 201KB to 16KB, roughly 51K tokens, which is a stale working document
+nobody had pruned.
+
+And the finding I did not go looking for, which is worth telling if there is
+time. I ranked splitting the 25-member DeviceOp god-trait as the single biggest
+lever going in. It has 24 members today. It never happened — because the model
+argued against it, and I caved.
+
+What it proposed instead was editorial: an ARCHITECTURE.md section telling the
+reader which four members are actually required and that the cb_* methods are
+ignorable unless you are touching command buffers. Four lines of documentation
+in place of a refactor I had scoped in days.
+
+Be careful how you judge that, because the measurement does not settle it. The
+corpus still dropped 2.4x, so the outcome was at minimum defensible and the
+model may simply have been right. But notice what mode I was in. This is not
+"the agent proposed, I verified" — it is "the agent argued, and I deferred on a
+design judgment in my own codebase." That is a third failure mode, distinct
+from the two the rest of this talk covers. The agent is not only sometimes
+wrong; it is consistently persuasive, and it never gets tired of arguing.
+
+What would have settled it is the experiment I only ran later: measure the
+cost of entry before and after. I had the metric available and I made the call
+by discussion instead. Given everything else in this talk, that is a slightly
+embarrassing place to have ended up.
 
 Every step behaviour-preserving, and verified as such: the runtime hotspots by
 running the full suite on three ICDs plus bit-identical simulation output; the

@@ -119,7 +119,8 @@ for i,s in enumerate(p.slides,1):
 | bisect green `a049ad4` / first red `236d9c0`; `wait=NONE` → `wait=[3]` | 21 | claspr commits `89386bf`, `3995ccb` |
 | "~200K tokens before it can make ANY change" | 22 | `claspr/NOTES.md:79` |
 | cognitive 39→7; cyclomatic 66→23, cognitive 33→13 | 22 | `claspr/NOTES.md:213–235`, Mozilla `rust-code-analysis-cli` |
-| 11,023 → 3,674 lines (−67%) | 22 | `claspr/NOTES.md:98` |
+| Corpus to orient: **~209K → ~88K tokens** (839 KB → 354 KB, 2.4×) | 22 | Measured 2026-08-05 by byte-counting the reachable corpus at two claspr SHAs — **`bcaf04e`** (last commit before the cost-of-entry work) vs **`094ce2b`**. Deterministic, no model calls, recomputable; see *The cost-of-entry measurement* below. |
+| "Total source fell only 6%" | 22 | `claspr/src` 26,891 → 25,265 lines. **Replaces an earlier "11,023 → 3,674, −67%" bullet**, which was true of `eager.rs` alone but implied deletion: the eager *subtree* went 11,722 → 11,508 (−1.8%) because 7,706 lines moved into five submodules. |
 | 1,000 Scientist AI Jam Session, **February 28, 2025** | 2, 3 | [anl.gov/cels/1000-scientist-ai-jam-session](https://www.anl.gov/cels/1000-scientist-ai-jam-session) and [events.cels.anl.gov/event/611](https://events.cels.anl.gov/event/611/). Note: Brice first recalled 2024; the model lineup (Claude 3.7 Sonnet shipped four days before the event) and the Indico page both confirm **2025**. |
 | The four models, their failures, and the ranking | 2, 3 | Brice's own contemporaneous written assessment, quoted in the speaker notes |
 | 1,000 Scientist AI Jam Session, **February 28, 2025** | 2, 3 | [anl.gov/cels/1000-scientist-ai-jam-session](https://www.anl.gov/cels/1000-scientist-ai-jam-session) and [events.cels.anl.gov/event/611](https://events.cels.anl.gov/event/611/). Note: Brice first recalled 2024; the model lineup (Claude 3.7 Sonnet shipped four days before the event) and the Indico page both confirm **2025**. |
@@ -139,6 +140,50 @@ and developer guide, changes to a backend it had never touched.
 It also closes a loop. In 2025 Brice partly blamed the failure on rust-gpu's backend being
 "a plate of spaghetti." Slide 22 returns to that: a year later he stopped treating illegibility as
 an excuse and started measuring it with `rust-code-analysis`.
+
+## The cost-of-entry measurement
+
+Slide 22's headline number. Deterministic, needs no model, recomputable by anyone from two SHAs
+in `~/projects/claspr` — `bcaf04e` (before the cost-of-entry work) and `094ce2b` (after).
+
+It counts the **reachable corpus**: the bytes an agent must load to make a graph-level change.
+BEFORE reads what looks relevant; AFTER is routed by the new `ARCHITECTURE.md`.
+
+| | BEFORE | AFTER (routed) |
+|---|---|---|
+| `NOTES.md` | 201,445 | 16,146 |
+| `ARCHITECTURE.md` | absent | 7,314 |
+| `CLAUDE.md` | 21,480 | 18,661 |
+| `eager.rs` | 550,595 | 199,076 |
+| `eager/leaves.rs` | — | 112,497 |
+| `record.rs` | 65,302 | 0 (path deleted) |
+| **total** | **838,822 B** | **353,694 B** |
+| ≈ tokens @ 4 B/tok | **~209K** | **~88K** |
+
+Two things worth stating whenever the number is used:
+
+- **The BEFORE figure independently reproduces the ~200K anecdote.** That figure had only ever
+  been an observation; it now has a measurement behind it.
+- **The reduction is navigability, not deletion.** Whole-library source fell ~6%; the eager
+  subtree fell 1.8%. The largest single line item is `NOTES.md` (−185 KB, ~51K tokens), a stale
+  working document. Claiming "we simplified the architecture" would be false.
+
+The full experiment design for an empirical A/B — parallel worktrees, a byte-identical negative
+control task, a docs-vs-code ablation, and per-subagent token accounting from the session JSONLs
+(deduplicated by `.message.id`, which otherwise overcounts ~4×) — was written up but **not run**;
+`n=3` on the eve of the talk could not have supported a significance claim.
+
+### The finding nobody went looking for
+
+`DeviceOp` was 25 members before and is 24 after. Splitting that god-trait was ranked *"the single
+biggest lever"* going in — and it never happened, because **the model argued against it and Brice
+deferred**. What shipped instead was editorial: an `ARCHITECTURE.md` section naming the four
+members that are actually required.
+
+The measurement does not settle whether that was right — the corpus dropped 2.4× regardless, so
+the model may simply have been correct. But it is a third mode, distinct from the two the deck
+otherwise covers: not the agent being wrong, and not the agent being unverified, but the agent
+being *persuasive* and the human deferring on a design judgment. It is in slide 22's speaker notes.
 
 ## Corrections applied after review
 
