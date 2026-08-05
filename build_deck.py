@@ -825,9 +825,10 @@ set_bullets(get_ph(s, 14), [
 set_text(get_ph(s, 17), "On uncharted code")
 set_bullets(get_ph(s, 15), [
     "Context exhaustion: eight auto-compactions in one session",
+    ("Fix: sub-agents do the work, main context only orchestrates", 1),
     "“Cleaned up” spike code that was intentional design documentation",
     "An edit anchor silently deleted a CI step",
-    ("Mitigation: end sessions early, pin toolchains", 1),
+    ("Mitigation: end sessions early, pin toolchains, read the diff", 1),
 ])
 set_notes(s, """
 Left column, real quotes from me to the agent: "I noticed you started using
@@ -838,6 +839,22 @@ computer scientists should be lazy, it usually ends up costing us more in the
 long run."
 
 Right column specifics:
+The sub-agent mitigation is the one worth dwelling on, because it is the most
+effective thing I found and it sets up a slide later.
+
+Once a session starts compacting, quality drops and it drifts. The strategy
+that actually worked was to stop doing the work in the main context at all:
+spawn a sub-agent per task — explore this subsystem, audit this change,
+implement this piece — and keep the main context purely for orchestration. The
+main thread then holds the plan and the decisions rather than a thousand lines
+of file contents, and it survives far longer.
+
+The catch, and this is where the next-to-last slide comes from: every sub-agent
+starts cold. It has to read its way into the architecture before it can change
+anything. That is when the ~200K cost of entry started to really bite — the
+delegation strategy is what made the cost visible, because suddenly I was
+paying it over and over instead of once per session.
+
 - The spike cleanup: it rewrote a scenario that deliberately used a workaround
   pattern, because the workaround looked like a smell. But the workaround WAS
   the documentation — it marked a missing primitive. I had to revert it and
@@ -933,10 +950,10 @@ set_text(get_ph(s, 0), "Context is a resource — so optimize it")
 set_text(get_ph(s, 13), "A performance-engineering reflex, turned on the agent itself")
 set_text(get_ph(s, 16), "The observation")
 set_bullets(get_ph(s, 14), [
+    "Delegating to sub-agents fixed context exhaustion — and exposed a new cost",
     "“A sub-agent burns ~200K tokens before it can make ANY change”",
-    "The architecture had grown too complex to hold in a context window",
-    "In 2025 I blamed the models partly on rust-gpu being spaghetti",
-    "In 2026 I stopped calling that an excuse and measured it",
+    "Every one starts cold, so I paid that entry fee over and over",
+    "In 2025 I blamed rust-gpu's spaghetti; in 2026 I measured my own",
 ])
 set_text(get_ph(s, 17), "The optimization")
 set_bullets(get_ph(s, 15), [
@@ -946,13 +963,21 @@ set_bullets(get_ph(s, 15), [
     "Behaviour-preserving, verified bit-identical on three runtimes",
 ])
 set_notes(s, """
-This is the slide that closes the loop with February 2025.
+This slide closes two loops at once — the sub-agent strategy from the pitfalls
+slide, and February 2025.
 
-Back then I explained the models' failure partly by saying rust-gpu's backend
-was spaghetti — hard to grasp. That was true, and it was also an excuse. A year
-later I had my own codebase with the same problem, and this time I treated it
-the way I would treat any other throughput problem: profile it, find the
-hotspots, fix the worst ones, measure again.
+First loop: delegating to sub-agents was the right answer to context
+exhaustion, but it changed the economics. One long session pays the
+cost-of-entry once. A fleet of sub-agents pays it every single time, because
+each one starts cold and has to read its way in before it can touch anything.
+That turned a vague "this code is hard to follow" into a metered, repeated,
+visible cost. Optimizing it stopped being hygiene and became throughput work.
+
+Second loop: back in February 2025 I explained the models' failure partly by
+saying rust-gpu's backend was spaghetti — hard to grasp. That was true, and it
+was also an excuse. A year later I had my own codebase with the same problem,
+and this time I treated it the way I would treat any other throughput problem:
+profile it, find the hotspots, fix the worst ones, measure again.
 
 The metric is Mozilla's rust-code-analysis-cli, ranking functions by cognitive
 and cyclomatic complexity. Input::try_bind_slot was the worst function in the
